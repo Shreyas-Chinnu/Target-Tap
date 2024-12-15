@@ -1,4 +1,3 @@
-
 // DOM Elements
 const gameContainer = document.getElementById('gameContainer');
 const circle = document.getElementById('circle');
