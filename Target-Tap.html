@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Target Tap - NexCore Games </title>
+    <title>Target Tap</title>
     <style>
         body {
             margin: 0;
@@ -59,67 +59,79 @@
     <div id="level">Level: 1</div>
     <div id="gameContainer"></div>
     <button id="resetButton">Reset</button>
-    <script>
-const gameContainer = document.getElementById('gameContainer');
-const circle = document.getElementById('circle');
-const scoreDisplay = document.getElementById('score');
-const timerDisplay = document.getElementById('timer');
-const resetButton = document.getElementById('resetButton');
-const gameOverMessage = document.getElementById('gameOverMessage');
-const finalScore = document.getElementById('finalScore');
-let score = 0;
-let timeLeft = 30;
-let gameInterval;
-let timerInterval;
-let highScore = localStorage.getItem('highScore') || 0;
-function startGame() {
-    score = 0;
-    timeLeft = 30;
-    scoreDisplay.textContent = score;
-    timerDisplay.textContent = timeLeft;
-    gameOverMessage.style.display = 'none';
-    moveCircle();
-    startTimer();
-}
-function moveCircle() {
-    const containerRect = gameContainer.getBoundingClientRect();
-    const circleSize = 20; 
-    const x = Math.random() * (containerRect.width - circleSize);
-    const y = Math.random() * (containerRect.height - circleSize);
-    circle.style.left = `${x}px`;
-    circle.style.top = `${y}px`;
-}
-function startTimer() {
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = timeLeft;
 
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            endGame();
+    <script>
+        const gameContainer = document.getElementById("gameContainer");
+        const scoreDisplay = document.getElementById("score");
+        const levelDisplay = document.getElementById("level");
+        const resetButton = document.getElementById("resetButton");
+
+        let score = 0;
+        let level = 1;
+        let circleSize = 50;
+        let circleSpeed = 1500; // Time in ms for circle to move
+        let gameInterval;
+
+        function createCircle() {
+            const circle = document.createElement("div");
+            circle.classList.add("circle");
+            circle.style.width = `${circleSize}px`;
+            circle.style.height = `${circleSize}px`;
+            placeCircleRandomly(circle);
+
+            circle.addEventListener("click", () => {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                updateLevel();
+                circle.remove();
+                createCircle();
+            });
+
+            gameContainer.appendChild(circle);
+
+            setTimeout(() => {
+                if (circle.parentElement) {
+                    circle.remove();
+                    createCircle();
+                }
+            }, circleSpeed);
         }
-    }, 1000);
-}
-circle.addEventListener('click', () => {
-    score++;
-    scoreDisplay.textContent = score;
-    moveCircle();
-});
-function endGame() {
-    clearInterval(gameInterval);
-    finalScore.textContent = score;
-    gameOverMessage.style.display = 'block';
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem('highScore', highScore);
-        alert(`New High Score: ${highScore}`);
-    }
-}
-resetButton.addEventListener('click', () => {
-    clearInterval(timerInterval);
-    startGame();
-});
-startGame();
+
+        function placeCircleRandomly(circle) {
+            const maxX = gameContainer.clientWidth - circleSize;
+            const maxY = gameContainer.clientHeight - circleSize;
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            circle.style.left = `${x}px`;
+            circle.style.top = `${y}px`;
+        }
+
+        function updateLevel() {
+            if (score % 5 === 0) {
+                level++;
+                levelDisplay.textContent = `Level: ${level}`;
+
+                // Increase difficulty
+                circleSize = Math.max(20, circleSize - 5); // Minimum size is 20px
+                circleSpeed = Math.max(800, circleSpeed - 200); // Minimum speed is 800ms
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            level = 1;
+            circleSize = 50;
+            circleSpeed = 1500;
+            scoreDisplay.textContent = `Score: ${score}`;
+            levelDisplay.textContent = `Level: ${level}`;
+            gameContainer.innerHTML = "";
+            createCircle();
+        }
+
+        resetButton.addEventListener("click", startGame);
+
+        // Start the game initially
+        startGame();
     </script>
 </body>
 </html>
